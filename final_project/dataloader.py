@@ -22,6 +22,7 @@ def get_dataloader(dataset='cifar10',
         ])
         dataset_template = torchvision.datasets.CIFAR10
         num_classes = 10
+        input_dims = 3
     elif dataset == 'cifar100':
         transform_train = transforms.Compose([
                 transforms.RandomCrop(32, padding=4),
@@ -35,6 +36,8 @@ def get_dataloader(dataset='cifar10',
             transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))
         ])
         num_classes = 100
+        input_dims = 3
+        
     elif dataset == 'mnist':
         transform_train = transforms.Compose(
             [transforms.ToTensor(),
@@ -42,13 +45,13 @@ def get_dataloader(dataset='cifar10',
         transform_test = transform_train
         dataset_template = torchvision.datasets.MNIST
         num_classes = 10
-        
+        input_dims = 1
     train_dataset = dataset_template(root=ROOT, train=True, download=True, transform=transform_train)
     test_dataset = dataset_template(root=ROOT, train=False, download=True, transform=transform_test)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, pin_memory=True,
                                             shuffle=True, num_workers=2)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, pin_memory=True,
+    val_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, pin_memory=True,
                                             shuffle=False, num_workers=2)
         
     
-    return train_loader, test_loader, num_classes
+    return train_loader, val_loader, num_classes, input_dims

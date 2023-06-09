@@ -1,4 +1,5 @@
 import datetime
+from tqdm import tqdm
 
 class TxtLogWriter:
     def __init__(self, config: dict, log_txt_path: str):
@@ -14,15 +15,15 @@ class TxtLogWriter:
                      identifer: str,
                      epoch: int, 
                      avg_loss: float = None, 
-                     avg_accuracy: float = None):
+                     avg_acc: float = None):
         if getattr(self, 'is_write_metric', None) == None:
             self.write_line('Progress: ')
         self.is_write_metric = True
         
         if identifer == 'train':
-            line = '\tTraining   Epoch {:3d}: avg_accuracy = {:.3f}, avg_loss = {:.3f}'.format(epoch, avg_accuracy, avg_loss)
+            line = '\tTraining   Epoch {:3d}: avg_accuracy = {:.3f}, avg_loss = {:.3f}'.format(epoch, avg_acc, avg_loss)
         elif identifer == 'validation':
-            line = '\tValidation Epoch {:3d}: avg_accuracy = {:.3f}'.format(epoch, avg_accuracy)
+            line = '\tValidation Epoch {:3d}: avg_accuracy = {:.3f}'.format(epoch, avg_acc)
         self.write_line(line)
         
     def write_best_metric(self, 
@@ -65,3 +66,12 @@ def get_timestamp() -> str:
                                             cur_time.hour, 
                                             cur_time.minute)
     return timestamp
+
+def get_progress_bar(identifer: str, 
+                     total_steps: int,
+                     epoch: int, 
+                     num_epochs: int):
+    progress_bar = tqdm(total = total_steps, 
+                        desc = "{:10s} Epoch {}/{}".format(identifer, epoch+1, num_epochs), 
+                        bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
+    return progress_bar
