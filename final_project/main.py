@@ -72,7 +72,7 @@ def train_one_epoch(model,
     return avg_accuracy, avg_loss
 
 def validation(model, val_loader):
-    model.val()
+    model.eval()
     total_accuracy = 0.0
     total_num_data = 0
     with get_progress_bar('Validation', len(val_loader), epoch, num_epochs) as progress_bar:
