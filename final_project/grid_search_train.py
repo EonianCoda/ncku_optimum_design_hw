@@ -10,8 +10,9 @@ max_concurrent_tasks = 2
 if __name__ == '__main__':
     
     grid_setting = {'--dataset': ['mnist', 'cifar10', 'cifar100'],
-                    '--batch_size': [256, 512, 1024],
+                    '--batch_size': [2048],
                     '--epochs': [100],
+                    '--model': ['mobilenet_small']
                     }
 
     grid_setting_keys = list(grid_setting.keys())

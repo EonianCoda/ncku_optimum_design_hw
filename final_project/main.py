@@ -5,16 +5,16 @@ import torch
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 
-from models.resent import ResNet50
 from dataloader import get_dataloader
-from optimizers.optimizer import get_optimizer
+from optimizers.get_optimizer import get_optimizer
 from utils import get_timestamp, convert_to_scientific, get_progress_bar, TxtLogWriter
-
+from models.get_model import get_model
 LOGS = './logs'
 SAVED_MODEL = './saved_model'
 
 def get_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--model', default='resnet')
     parser.add_argument('--dataset', '--data', default='cifar10')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--use_pretrained', '--use-pretrained', action='store_false')
@@ -106,6 +106,7 @@ def validation(model,
 
 if __name__ == '__main__':
     args = get_args()
+    model_name = args.model
     dataset = args.dataset
     opt_name = args.opt
     num_epochs = args.epochs
@@ -114,7 +115,8 @@ if __name__ == '__main__':
     extra_exp_name = args.extra
     use_pretrained = args.use_pretrained
     add_timestamp = args.add_timestamp
-    config = {'dataset': dataset,
+    config = {'model': model_name,
+              'dataset': dataset,
               'optmizer': opt_name,
               'num_epochs': num_epochs,
               'learning_rate': learning_rate,
@@ -124,9 +126,11 @@ if __name__ == '__main__':
     # Initialize dataloader, model and loss    
     train_loader, val_loader, num_classes, input_dims = get_dataloader(dataset, batch_size)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = ResNet50(input_dims = input_dims,
-                     use_pretrained = use_pretrained,
-                    num_classes = num_classes)
+    
+    model = get_model(model_type = model_name, 
+                      input_dims = input_dims, 
+                      num_classes = num_classes, 
+                      use_pretrained = use_pretrained)
     model = model.to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = get_optimizer(model, opt_name, lr=learning_rate)
@@ -134,13 +138,15 @@ if __name__ == '__main__':
     # Initialize the name of experiment
     if add_timestamp:
         timestamp = get_timestamp()
-        exp_name = '{}_{}{}_bs{}_epoch{}'.format(timestamp, 
-                                                opt_name, 
-                                                convert_to_scientific(learning_rate, 'lr'),
-                                                batch_size,
-                                                num_epochs)
+        exp_name = '{}_{}_{}{}_bs{}_epoch{}'.format(timestamp, 
+                                                    model_name,
+                                                    opt_name, 
+                                                    convert_to_scientific(learning_rate, 'lr'),
+                                                    batch_size,
+                                                    num_epochs)
     else:
-        exp_name = '{}{}_bs{}_epoch{}'.format(opt_name, 
+        exp_name = '{}_{}{}_bs{}_epoch{}'.format(model_name,
+                                                opt_name, 
                                                 convert_to_scientific(learning_rate, 'lr'),
                                                 batch_size,
                                                 num_epochs)
