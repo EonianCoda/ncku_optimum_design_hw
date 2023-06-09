@@ -21,6 +21,7 @@ def get_args():
     parser.add_argument('--lr', '--learning_rate', '--learning-rate', type=float, default=1e-3)
     parser.add_argument('--bs', '--batch_size', '--batch-size', type=int, default=1024)
     parser.add_argument('--opt', '--optimizer', default='adam')
+    parser.add_argument('--add_timestamp', '--add-timestamp', action='store_true')
     parser.add_argument('--extra', default='')
     args = parser.parse_args()
     return args
@@ -112,6 +113,7 @@ if __name__ == '__main__':
     batch_size = args.bs
     extra_exp_name = args.extra
     use_pretrained = args.use_pretrained
+    add_timestamp = args.add_timestamp
     config = {'dataset': dataset,
               'optmizer': opt_name,
               'num_epochs': num_epochs,
@@ -130,13 +132,18 @@ if __name__ == '__main__':
     optimizer = get_optimizer(model, opt_name, lr=learning_rate)
 
     # Initialize the name of experiment
-    timestamp = get_timestamp()
-    
-    exp_name = '{}_{}{}_bs{}_epoch{}'.format(timestamp, 
-                                            opt_name, 
-                                            convert_to_scientific(learning_rate, 'lr'),
-                                            batch_size,
-                                            num_epochs)
+    if add_timestamp:
+        timestamp = get_timestamp()
+        exp_name = '{}_{}{}_bs{}_epoch{}'.format(timestamp, 
+                                                opt_name, 
+                                                convert_to_scientific(learning_rate, 'lr'),
+                                                batch_size,
+                                                num_epochs)
+    else:
+        exp_name = '{}{}_bs{}_epoch{}'.format(opt_name, 
+                                                convert_to_scientific(learning_rate, 'lr'),
+                                                batch_size,
+                                                num_epochs)
     if use_pretrained:
         exp_name = exp_name + '_pretrained'
     if extra_exp_name != '':
