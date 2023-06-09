@@ -17,7 +17,7 @@ SAVED_MODEL = './saved_model'
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', '--data', default='cifar10')
-    parser.add_argument('--epochs', type=float, default=50)
+    parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--lr', '--learning_rate', '--learning-rate', type=float, default=1e-3)
     parser.add_argument('--bs', '--batch_size', '--batch-size', type=int, default=1024)
     parser.add_argument('--opt', '--optimizer', default='adam')
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     log_txt_path = os.path.join(saving_folder, 'log.txt')
     
     os.makedirs(log_saving_folder, exist_ok=True)
-    writer = SummaryWriter(log_dir=log_saving_folder)
+    writer = SummaryWriter(log_dir=log_saving_folder, flush_secs=60)
     txt_writer = TxtLogWriter(config, log_txt_path)
     
     
@@ -156,6 +156,7 @@ if __name__ == '__main__':
             }
             torch.save(checkpoint, os.path.join(saving_folder, f'best.pth'))
         print()
-        
+    
+    writer.close()
     txt_writer.write_best_metric(best_epoch, best_accuracy = best_acc)
-    print('Best epoch = {:3d}, Best Accuracy = {:3f}'.format(best_epoch, best_acc))
+    print('Best epoch = {:3d}, Best Accuracy = {:.3f}'.format(best_epoch, best_acc))

@@ -20,16 +20,16 @@ class TxtLogWriter:
         self.is_write_metric = True
         
         if identifer == 'train':
-            line = 'Training   Epoch {}: avg_loss = {:.3f}, avg_accuracy = {:.3f}'.format(epoch, avg_loss, avg_accuracy)
+            line = '\tTraining   Epoch {:3d}: avg_accuracy = {:.3f}, avg_loss = {:.3f}'.format(epoch, avg_accuracy, avg_loss)
         elif identifer == 'validation':
-            line = 'Validation Epoch {}: avg_accuracy = {:.3f}'.format(epoch, avg_accuracy)
+            line = '\tValidation Epoch {:3d}: avg_accuracy = {:.3f}'.format(epoch, avg_accuracy)
         self.write_line(line)
         
     def write_best_metric(self, 
                         best_epoch: int, 
                         best_accuracy: float):
-        self.write_line('Best: ')
-        self.write_line('best epoch = {:3d}, best_accuracy = {:.3f}'.format(best_epoch, best_accuracy))
+        self.write_line('\nBest: ')
+        self.write_line('\tbest epoch = {:3d}, best_accuracy = {:.3f}'.format(best_epoch, best_accuracy))
         
     def write_line(self, line: str):
         with open(self.log_txt_path, 'a') as f:
