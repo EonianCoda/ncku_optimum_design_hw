@@ -35,6 +35,7 @@ def get_dataloader(dataset='cifar10',
             transforms.ToTensor(),
             transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))
         ])
+        dataset_template = torchvision.datasets.CIFAR100
         num_classes = 100
         input_dims = 3
         
@@ -49,9 +50,9 @@ def get_dataloader(dataset='cifar10',
     train_dataset = dataset_template(root=ROOT, train=True, download=True, transform=transform_train)
     test_dataset = dataset_template(root=ROOT, train=False, download=True, transform=transform_test)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, pin_memory=True,
-                                            shuffle=True, num_workers=2)
+                                            shuffle=True, num_workers=4)
     val_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, pin_memory=True,
-                                            shuffle=False, num_workers=2)
+                                            shuffle=False, num_workers=4)
         
     
     return train_loader, val_loader, num_classes, input_dims

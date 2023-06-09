@@ -17,7 +17,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', '--data', default='cifar10')
     parser.add_argument('--epochs', type=int, default=50)
-    parser.add_argument('--use_pretrained', '--use-pretrained', action='store_true')
+    parser.add_argument('--use_pretrained', '--use-pretrained', action='store_false')
     parser.add_argument('--lr', '--learning_rate', '--learning-rate', type=float, default=1e-3)
     parser.add_argument('--bs', '--batch_size', '--batch-size', type=int, default=1024)
     parser.add_argument('--opt', '--optimizer', default='adam')
@@ -29,6 +29,7 @@ def train_one_epoch(model,
                     train_loader,
                     optimizer,
                     criterion,
+                    device,
                     epoch: int,
                     num_epochs: int):
     model.train()
@@ -37,11 +38,10 @@ def train_one_epoch(model,
     total_num_data = 0
     with get_progress_bar('Training', len(train_loader), epoch, num_epochs) as progress_bar:
         for images, labels in train_loader:
-            
             images = images.to(device)
             labels = labels.to(device)
-             
             outputs = model(images)
+            # Compute loss and update model
             loss = criterion(outputs, labels)
             optimizer.zero_grad()
             loss.backward()
@@ -71,16 +71,19 @@ def train_one_epoch(model,
     avg_loss = total_loss / total_num_data
     return avg_accuracy, avg_loss
 
-def validation(model, val_loader):
+def validation(model, 
+               val_loader,
+               device,
+               epoch: int,
+               num_epochs: int):
     model.eval()
     total_accuracy = 0.0
     total_num_data = 0
     with get_progress_bar('Validation', len(val_loader), epoch, num_epochs) as progress_bar:
         with torch.no_grad():
-            for images, labels in enumerate(val_loader):
+            for images, labels in val_loader:
                 images = images.to(device)
-                labels = labels.numpy()
-
+                labels = labels.to(device)
                 outputs = model(images)
                 
                 # Compute accuracy
@@ -128,16 +131,19 @@ if __name__ == '__main__':
 
     # Initialize the name of experiment
     timestamp = get_timestamp()
+    
     exp_name = '{}_{}{}_bs{}_epoch{}'.format(timestamp, 
                                             opt_name, 
                                             convert_to_scientific(learning_rate, 'lr'),
                                             batch_size,
                                             num_epochs)
+    if use_pretrained:
+        exp_name = exp_name + '_pretrained'
     if extra_exp_name != '':
         exp_name = exp_name + f'_{extra_exp_name}'
     
     # Initialize folders
-    saving_folder = os.path.join(SAVED_MODEL, exp_name)
+    saving_folder = os.path.join(SAVED_MODEL, dataset, exp_name)
     log_saving_folder = os.path.join(saving_folder, LOGS)
     log_txt_path = os.path.join(saving_folder, 'log.txt')
     
@@ -153,7 +159,7 @@ if __name__ == '__main__':
         total_accuracy = 0.0
         
         # Training
-        avg_tain_acc, avg_loss = train_one_epoch(model, train_loader, optimizer, criterion, epoch, num_epochs)
+        avg_tain_acc, avg_loss = train_one_epoch(model, train_loader, optimizer, criterion, device, epoch, num_epochs)
         writer.add_scalar('Train/loss', avg_loss, epoch)
         writer.add_scalar('Train/accuracy', avg_tain_acc, epoch)
         txt_writer.write_metric('train', 
@@ -161,7 +167,7 @@ if __name__ == '__main__':
                                 avg_acc = avg_tain_acc, 
                                 avg_loss = avg_loss)
         # Validation
-        avg_val_acc = validation(model, val_loader)
+        avg_val_acc = validation(model, val_loader, device, epoch, num_epochs)
         writer.add_scalar('Validation/accuracy', avg_val_acc, epoch)
         txt_writer.write_metric('validation', 
                                 epoch = epoch, 
