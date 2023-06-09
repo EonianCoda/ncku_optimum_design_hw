@@ -5,14 +5,15 @@ import itertools
 import time
 
 BASE_CMD = [sys.executable, 'main.py']
-max_concurrent_tasks = 2
+max_concurrent_tasks = 1
 
 if __name__ == '__main__':
     
-    grid_setting = {'--dataset': ['mnist', 'cifar10', 'cifar100'],
+    grid_setting = {'--dataset': ['cifar10', 'cifar100', 'mnist'],
                     '--batch_size': [2048],
                     '--epochs': [100],
-                    '--model': ['mobilenet_small']
+                    '--model': ['resnet'],
+                    '--optimizer': ['shampoo']
                     }
 
     grid_setting_keys = list(grid_setting.keys())
