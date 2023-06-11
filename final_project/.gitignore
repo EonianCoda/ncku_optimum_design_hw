@@ -4,3 +4,5 @@ __pycache__
 *.ipynb
 saved_model
 *.pth
+*.png
+*.jpg
